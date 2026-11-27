@@ -1,0 +1,38 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build da imagem Docker
+        run: docker build --pull -t lab40:feature08 .
+
+      - name: Exportar imagem
+        run: docker save lab40:feature08 -o lab40-feature08.tar
+
+      - name: Gerar registro de entrega
+        run: |
+          {
+            echo "repositorio=${{ github.repository }}"
+            echo "referencia=${{ github.ref }}"
+            echo "sha=${{ github.sha }}"
+            echo "tag=lab40:feature08"
+            echo "data=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > deployment-record.txt
+          cat deployment-record.txt
+
+      - name: Publicar artefato de entrega
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab40-delivery-record
+          path: |
+            lab40-feature08.tar
+            deployment-record.txt
