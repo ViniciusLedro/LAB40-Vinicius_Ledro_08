@@ -1,53 +1,45 @@
-# LAB40 – Laboratório de Funcionalidades Web
+# LAB40 - Feature 08: Calculadora de fatorial
 
-Projeto-base para avaliação prática de Integração e Entrega Contínua (CI/CD).
+Aluno: Vinicius Ledro | Módulo: 08
 
-## Requisitos
-- Node.js 20 ou superior.
-- npm.
+## Instalação e execução
 
-## Executar localmente
-```bash
-npm install
-npm start
-```
-Acesse http://localhost:3000. Para desenvolvimento com reinicialização automática: `npm run dev`.
+    npm install
+    npm start
 
-## Endpoints
-- `GET /health`: verificação de disponibilidade.
-- `GET /api/features`: lista as 40 funcionalidades e seus estados.
-- `POST /api/features/:id`: executa uma funcionalidade, recebendo JSON no corpo.
+A aplicação abre em http://localhost:3000. O endpoint /health indica que o servidor está ativo.
 
-Exemplo:
-```bash
-curl -X POST http://localhost:3000/api/features/1 -H "Content-Type: application/json" -d '{"valor":200,"percentual":15}'
-```
+## Testes automatizados
 
-## Estrutura
-```text
-lab40/
-├── public/
-├── src/
-│   ├── app.js
-│   ├── server.js
-│   └── features/
-├── package.json
-└── package-lock.json
-```
+    npm test
+    npm run test:spec   (relatório detalhado)
 
-## Contrato de cada módulo
-Cada arquivo `src/features/featureNN.js` exporta `id`, `name`, `description`, `implemented` e `execute(input)`.
+Cobrem: caso típico (5 → 120), fronteiras (0, 1 e 170) e entradas inválidas (-1, 2.2, 171 e string).
 
-1. Implemente `execute(input)`.
-2. Valide os dados recebidos.
-3. Retorne um objeto serializável em JSON.
-4. Trate entradas inválidas lançando `Error` com mensagem clara.
-5. Depois de implementar e validar, altere `implemented` para `true`.
-6. Não altere o contrato dos outros módulos nem a API central sem autorização.
+## Lint
 
-Enquanto `implemented` for `false`, a API retorna HTTP 501 para aquele módulo.
+    npm run lint
 
-## Importante
-Este repositório é entregue intencionalmente sem testes automatizados, análise estática, workflow de CI, build ou configuração de deploy. O estudante deverá criar e justificar esses elementos durante a avaliação.
+Configurado com ESLint (eslint.config.js). Resultado: sem erros nem avisos.
 
-O servidor escuta `process.env.PORT` e `0.0.0.0`, e a aplicação não persiste dados em disco.
+## Auditoria de dependências
+
+    npm audit --audit-level=high
+
+Resultado observado: `found 0 vulnerabilities`. Nenhuma ação foi necessária.
+
+## Roteiro de testes manuais
+
+1. Executar `npm start` e abrir http://localhost:3000.
+2. Abrir http://localhost:3000/health e confirmar o JSON com status ok.
+3. Na interface, selecionar o cartão 08, usar `{ "numero": 5 }` e confirmar `resultado: 120`.
+4. Pela API, enviar POST em /api/features/8 com `{ "numero": 0 }` e confirmar `resultado: 1`.
+5. Pela API, enviar `{ "numero": 171 }` e confirmar erro 400 com a mensagem "Informe inteiro entre 0 e 170."
+6. Confirmar que o servidor continua respondendo em /health após o erro.
+
+## Decisões técnicas
+
+- Entrada validada com Number.isInteger e limite de 0 a 170.
+- O limite 170 existe porque 171! excede o máximo do tipo Number e viraria Infinity.
+- Laço iterativo em vez de recursão, como orienta o enunciado.
+- Erros lançados com `throw new Error(...)` e mensagem clara.
